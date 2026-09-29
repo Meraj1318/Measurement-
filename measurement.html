@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Measurement Calculator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f5f8;
+      color: #222;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 650px;
+      margin: auto;
+      padding: 15px;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 18px 15px;
+      text-align: center;
+      border-radius: 0 0 15px 15px;
+      margin-bottom: 15px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .card-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .delete-btn {
+      border: none;
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 8px 11px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+
+    .description-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 15px;
+    }
+
+    .description-input:focus,
+    select:focus,
+    input:focus {
+      border-color: #2563eb;
+    }
+
+    .dimension-title {
+      font-size: 15px;
+      font-weight: bold;
+      margin: 13px 0 8px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 1.2fr;
+      gap: 8px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      height: 44px;
+      border: 1px solid #d1d5db;
+      border-radius: 9px;
+      padding: 0 10px;
+      font-size: 15px;
+      background: white;
+      outline: none;
+    }
+
+    input[type="number"] {
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .bottom-buttons {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .add-btn,
+    .print-btn {
+      flex: 1;
+      height: 48px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .add-btn {
+      background: #2563eb;
+      color: white;
+    }
+
+    .print-btn {
+      background: #111827;
+      color: white;
+    }
+
+    .add-btn:active,
+    .print-btn:active,
+    .delete-btn:active {
+      transform: scale(0.98);
+    }
+
+    /* PRINT AREA */
+    .print-area {
+      display: none;
+    }
+
+    @media print {
+
+      @page {
+        size: A4;
+        margin: 18mm;
+      }
+
+      body {
+        background: white;
+        color: black;
+      }
+
+      .container {
+        display: none;
+      }
+
+      .print-area {
+        display: block;
+        width: 100%;
+      }
+
+      .print-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 25px;
+      }
+
+      .print-measurements-title {
+        font-size: 19px;
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      .print-measurement {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+
+      .print-description-title {
+        font-size: 19px;
+        font-weight: bold;
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+
+      .print-description {
+        font-size: 17px;
+        margin-bottom: 10px;
+      }
+    }
+
+    @media (max-width: 420px) {
+
+      .input-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .input-row select,
+      .input-row input {
+        height: 46px;
+      }
+
+      header h1 {
+        font-size: 21px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header>
+      <h1>Measurement Calculator</h1>
+      <p>Width & Height Measurement</p>
+    </header>
+
+    <div id="measurements"></div>
+
+    <div class="bottom-buttons">
+      <button class="add-btn" onclick="addMeasurement()">
+        + Add Measurement
+      </button>
+
+      <button class="print-btn" onclick="printMeasurements()">
+        🖨️ Print
+      </button>
+    </div>
+
+  </div>
+
+
+  <!-- PRINT ONLY AREA -->
+  <div class="print-area">
+
+    <div class="print-title">
+      Measurements
+    </div>
+
+    <div class="print-measurements-title">
+      Measurements
+    </div>
+
+    <div id="printMeasurements"></div>
+
+    <div class="print-description-title">
+      Description
+    </div>
+
+    <div id="printDescriptions"></div>
+
+  </div>
+
+
+  <script>
+
+    /* =========================
+       FRACTION OPTIONS
+    ========================= */
+
+    const fractions = [
+      { text: "", value: 0 },
+
+      { text: "1/8", value: 0.125 },
+      { text: "1/4", value: 0.25 },
+      { text: "3/8", value: 0.375 },
+      { text: "1/2", value: 0.5 },
+      { text: "5/8", value: 0.625 },
+      { text: "3/4", value: 0.75 },
+      { text: "7/8", value: 0.875 },
+
+      { text: "1/16", value: 0.0625 },
+      { text: "3/16", value: 0.1875 },
+      { text: "5/16", value: 0.3125 },
+      { text: "7/16", value: 0.4375 },
+      { text: "9/16", value: 0.5625 },
+      { text: "11/16", value: 0.6875 },
+      { text: "13/16", value: 0.8125 },
+      { text: "15/16", value: 0.9375 }
+    ];
+
+
+    /* =========================
+       FRACTION DROPDOWN
+    ========================= */
+
+    function fractionOptions() {
+
+      return fractions.map(f => {
+
+        return `
+          <option value="${f.value}">
+            ${f.text || "No Fraction"}
+          </option>
+        `;
+
+      }).join("");
+
+    }
+
+
+    /* =========================
+       ADD MEASUREMENT
+    ========================= */
+
+    function addMeasurement() {
+
+      const container =
+        document.getElementById("measurements");
+
+      const number =
+        container.children.length + 1;
+
+      const card =
+        document.createElement("div");
+
+      card.className = "card";
+
+      card.innerHTML = `
+
+        <div class="card-header">
+
+          <h2>
+            Measurement ${number}
+          </h2>
+
+          <button
+            class="delete-btn"
+            onclick="deleteMeasurement(this)"
+          >
+            Delete
+          </button>
+
+        </div>
+
+
+        <label>
+          Description
+        </label>
+
+        <input
+          type="text"
+          class="description-input"
+          placeholder="Enter description"
+        >
+
+
+        <div class="dimension-title">
+          Width
+        </div>
+
+        <div class="input-row">
+
+          <select class="width-unit">
+
+            <option value="inch">
+              Inch
+            </option>
+
+            <option value="mm">
+              MM
+            </option>
+
+          </select>
+
+
+          <input
+            type="number"
+            class="width-number"
+            min="0"
+            step="1"
+            placeholder="Natural Number"
+            inputmode="numeric"
+          >
+
+
+          <select class="width-fraction">
+
+            ${fractionOptions()}
+
+          </select>
+
+        </div>
+
+
+        <div class="dimension-title">
+          Height
+        </div>
+
+        <div class="input-row">
+
+          <select class="height-unit">
+
+            <option value="inch">
+              Inch
+            </option>
+
+            <option value="mm">
+              MM
+            </option>
+
+          </select>
+
+
+          <input
+            type="number"
+            class="height-number"
+            min="0"
+            step="1"
+            placeholder="Natural Number"
+            inputmode="numeric"
+          >
+
+
+          <select class="height-fraction">
+
+            ${fractionOptions()}
+
+          </select>
+
+        </div>
+
+      `;
+
+      container.appendChild(card);
+
+      updateNumbers();
+
+    }
+
+
+    /* =========================
+       DELETE MEASUREMENT
+    ========================= */
+
+    function deleteMeasurement(button) {
+
+      const card =
+        button.closest(".card");
+
+      card.remove();
+
+      updateNumbers();
+
+    }
+
+
+    /* =========================
+       UPDATE NUMBERING
+    ========================= */
+
+    function updateNumbers() {
+
+      const cards =
+        document.querySelectorAll(
+          "#measurements .card"
+        );
+
+      cards.forEach((card, index) => {
+
+        card.querySelector("h2").textContent =
+          `Measurement ${index + 1}`;
+
+      });
+
+    }
+
+
+    /* =========================
+       GET FRACTION TEXT
+    ========================= */
+
+    function getFractionText(value) {
+
+      const fraction =
+        fractions.find(
+          f => Math.abs(f.value - Number(value)) < 0.0001
+        );
+
+      return fraction ? fraction.text : "";
+
+    }
+
+
+    /* =========================
+       FORMAT WIDTH / HEIGHT
+    ========================= */
+
+    function formatDimension(
+      number,
+      fractionValue,
+      unit
+    ) {
+
+      const num =
+        number ? String(number).trim() : "";
+
+      const fraction =
+        getFractionText(fractionValue);
+
+      let result = "";
+
+      if (num) {
+        result += num;
+      }
+
+      if (fraction) {
+
+        if (result) {
+          result += " ";
+        }
+
+        result += fraction;
+
+      }
+
+      if (unit === "inch") {
+
+        result += '"';
+
+      } else {
+
+        if (result) {
+          result += " ";
+        }
+
+        result += "MM";
+
+      }
+
+      return result || (unit === "inch" ? '"' : "MM");
+
+    }
+
+
+    /* =========================
+       FORMAT COMPLETE MEASUREMENT
+    ========================= */
+
+    function formatMeasurement(card) {
+
+      const widthNumber =
+        card.querySelector(
+          ".width-number"
+        ).value;
+
+      const widthFraction =
+        card.querySelector(
+          ".width-fraction"
+        ).value;
+
+      const widthUnit =
+        card.querySelector(
+          ".width-unit"
+        ).value;
+
+
+      const heightNumber =
+        card.querySelector(
+          ".height-number"
+        ).value;
+
+      const heightFraction =
+        card.querySelector(
+          ".height-fraction"
+        ).value;
+
+      const heightUnit =
+        card.querySelector(
+          ".height-unit"
+        ).value;
+
+
+      const width =
+        formatDimension(
+          widthNumber,
+          widthFraction,
+          widthUnit
+        );
+
+
+      const height =
+        formatDimension(
+          heightNumber,
+          heightFraction,
+          heightUnit
+        );
+
+
+      return `${width} X ${height}`;
+
+    }
+
+
+    /* =========================
+       PRINT
+    ========================= */
+
+    function printMeasurements() {
+
+      const cards =
+        document.querySelectorAll(
+          "#measurements .card"
+        );
+
+      const printMeasurements =
+        document.getElementById(
+          "printMeasurements"
+        );
+
+      const printDescriptions =
+        document.getElementById(
+          "printDescriptions"
+        );
+
+
+      printMeasurements.innerHTML = "";
+      printDescriptions.innerHTML = "";
+
+
+      cards.forEach((card, index) => {
+
+        const number =
+          index + 1;
+
+
+        /* Measurement */
+
+        const measurement =
+          document.createElement("div");
+
+        measurement.className =
+          "print-measurement";
+
+        measurement.textContent =
+          `${number}. ${formatMeasurement(card)}`;
+
+        printMeasurements.appendChild(
+          measurement
+        );
+
+
+        /* Description */
+
+        const description =
+          card.querySelector(
+            ".description-input"
+          ).value.trim();
+
+
+        const descriptionElement =
+          document.createElement("div");
+
+        descriptionElement.className =
+          "print-description";
+
+        descriptionElement.textContent =
+          `${number}. ${description || "—"}`;
+
+        printDescriptions.appendChild(
+          descriptionElement
+        );
+
+      });
+
+
+      window.print();
+
+    }
+
+
+    /* =========================
+       START WITH ONE MEASUREMENT
+    ========================= */
+
+    addMeasurement();
+
+  </script>
+
+</body>
+</html>
